@@ -14,7 +14,7 @@ except:
                  '-': None}
 
 from ...element import HLine
-from ...core.util import datetime_types
+from ...core.util import datetime_types, dimension_sanitizer
 from .element import (ElementPlot, CompositeElementPlot,
                       text_properties, line_properties)
 from .util import date_to_integer
@@ -65,22 +65,15 @@ class LabelsPlot(ElementPlot):
     _plot_methods = dict(single='text', batched='text')
     _batched_style_opts = text_properties
 
-    def get_data(self, element, ranges=None, empty=False):
+    def get_data(self, element, ranges, style):
         style = self.style[self.cyclic_index]
         dims = element.dimensions(label=True)
-
-        xidx, yidx = (1, 0) if self.invert_axes else (0, 1)
-        mapping = dict(x=dims[xidx], y=dims[yidx])
-        data = {}
-
-        xdim, ydim = dims[xidx], dims[yidx]
-        data[xdim] = element.dimension_values(xidx)
-        data[ydim] = element.dimension_values(yidx)
+        coords = (1, 0) if self.invert_axes else (0, 1)
+        xdim, ydim, tdim = (dimension_sanitizer(dims[i]) for i in coords+(2,))
+        mapping = dict(x=xdim, y=ydim, text=tdim)
+        data = {d: element.dimension_values(d) for d in (xdim, ydim, tdim)}
         self._categorize_data(data, (xdim, ydim), element.dimensions())
-
-        text_dim = dims[2]
-        data[text_dim] = element.dimension_values(text_dim)
-        return data, mapping
+        return data, mapping, style
 
 
 
