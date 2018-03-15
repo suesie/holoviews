@@ -396,7 +396,7 @@ class Graph(Dataset, Element2D):
             nodes = nodes.add_dimension('x', 0, xs)
             nodes = nodes.add_dimension('y', 1, ys).clone(new_type=self.node_type)
         else:
-            nodes = self.node_type([tuple(pos)+(idx,) for idx, pos in sorted(positions.items())])
+            nodes = cls.node_type([tuple(pos)+(idx,) for idx, pos in sorted(positions.items())])
         return cls((edges, nodes))
 
 
